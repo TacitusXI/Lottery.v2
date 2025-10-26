@@ -8,6 +8,8 @@
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.19-e6e6e6?style=for-the-badge&logo=solidity&logoColor=black)](https://docs.soliditylang.org/)
 [![Foundry](https://img.shields.io/badge/Foundry-000000?style=for-the-badge&logo=ethereum&logoColor=white)](https://book.getfoundry.sh/)
 [![Chainlink](https://img.shields.io/badge/Chainlink-375BD2?style=for-the-badge&logo=chainlink&logoColor=white)](https://chain.link/)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/TacitusXI/Lottery.v2)
+[![Tests](https://img.shields.io/badge/Tests-47%20Passing-success?style=for-the-badge)](https://github.com/TacitusXI/Lottery.v2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
