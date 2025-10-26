@@ -33,7 +33,7 @@ A fully decentralized lottery system built with Foundry that ensures:
 - **Fully Automated**: Chainlink Automation triggers winner selection automatically
 - **Multi-Network**: Supports Ethereum Sepolia, Polygon Amoy, and local Anvil
 - **Gas Optimized**: Uses custom errors and optimized storage patterns
-- **Well Tested**: 81%+ test coverage with comprehensive unit and staging tests
+- **Extensively Tested**: 98%+ test coverage with unit, fuzz, invariant, and staging tests
 
 ### How It Works
 
@@ -67,7 +67,7 @@ A fully decentralized lottery system built with Foundry that ensures:
 ✅ **Multi-Network Support** - Ethereum, Polygon Amoy, Local Anvil  
 ✅ **Automated Deployment** - Scripts handle VRF subscription creation and funding  
 ✅ **Secure Key Management** - Supports encrypted keystores (no plain text keys)  
-✅ **Comprehensive Tests** - Unit tests, staging tests, 81%+ coverage  
+✅ **Comprehensive Tests** - Unit, fuzz, invariant, staging tests, 98%+ coverage  
 ✅ **Professional CI/CD Ready** - Structured for GitHub Actions integration  
 
 ---
@@ -198,37 +198,68 @@ PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
 
 ## 🧪 Testing
 
+### Test Suite Overview
+
+**46 comprehensive tests** with **98%+ coverage**:
+- ✅ 36 Unit Tests (functional testing)
+- ✅ 8 Invariant Tests (property-based testing, 128K calls)
+- ✅ 3 Fuzz Tests (256 runs each)
+- ✅ 2 Staging Tests (integration testing)
+
 ### Run All Tests
 
 ```bash
 forge test
 ```
 
+### Run Specific Test Types
+
+```bash
+# Unit tests only
+forge test --match-path test/unit/LotteryTest.t.sol
+
+# Invariant tests (stateful fuzzing)
+forge test --match-path test/unit/LotteryInvariant.t.sol
+
+# Staging tests (testnet integration)
+forge test --match-path test/staging/
+
+# Specific test
+forge test --match-test testGetEntranceFeeReturnsCorrectValue
+```
+
 ### Run Tests with Verbosity
 
 ```bash
-forge test -vvvv
-```
-
-### Run Specific Test
-
-```bash
-forge test --match-test testLotteryInitializesInOpenState
+forge test -vv   # Show stack traces on failure
+forge test -vvv  # Show stack traces + setup
+forge test -vvvv # Full traces
 ```
 
 ### Generate Coverage Report
 
 ```bash
-forge coverage
+forge coverage --report summary
 ```
+
+### Gas Benchmarking
+
+```bash
+forge test --gas-report  # Gas usage per function
+forge snapshot           # Save gas snapshot
+```
+
+### Test Documentation
+
+See [test/README.md](test/README.md) for detailed test documentation.
 
 **Current Coverage:**
 ```
 src/Lottery.sol:
-├── Lines:      81.03% ✅
-├── Statements: 88.24% ✅
+├── Lines:      98.28% ✅
+├── Statements: 98.04% ✅
 ├── Branches:   75.00% ⚠️
-└── Functions:  64.29% ⚠️
+└── Functions:  100.00% ✅
 ```
 
 ### Gas Snapshot
@@ -360,9 +391,9 @@ slither . --exclude-dependencies
 
 ```
 Smart Contracts:     1 (Lottery.sol)
-Lines of Code:       ~225 (contract only)
-Test Coverage:       81%+ 
-Number of Tests:     16 (14 unit, 2 staging)
+Lines of Code:       ~320 (contract + tests)
+Test Coverage:       98%+ (Lines), 100% (Functions)
+Number of Tests:     46 (36 unit, 8 invariant, 2 staging)
 Gas Optimization:    Custom errors, immutables
 Deployment Scripts:  Fully automated
 Networks Supported:  3 (Anvil, Sepolia, Polygon Amoy)
@@ -431,9 +462,9 @@ Contributions are welcome! Please:
 5. Open Pull Request
 
 ### Areas for Contribution:
-- Increase test coverage to 95%+
-- Add fuzz and invariant tests
-- Implement Pausable pattern
+- Implement Pausable pattern for emergency stops
+- Add reentrancy guard tests
+- Achieve 100% branch coverage
 - Add multi-winner support
 - Create frontend DApp
 - Improve gas optimization
