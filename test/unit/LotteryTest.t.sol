@@ -277,5 +277,270 @@ contract LotteryTest is Test, CodeConstants {
         assert(winnerBalance == startingBalance + prize);
         assert(endingTimeStamp > startingTimeStamp);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              GETTER TESTS
+    //////////////////////////////////////////////////////////////*/
+    function testGetEntranceFeeReturnsCorrectValue() public view {
+        uint256 entranceFee = lottery.getEntranceFee();
+        assert(entranceFee == lotteryEntranceFee);
+    }
+
+    function testGetIntervalReturnsCorrectValue() public view {
+        uint256 interval = lottery.getInterval();
+        assert(interval == automationUpdateInterval);
+    }
+
+    function testGetNumWordsReturnsOne() public view {
+        uint256 numWords = lottery.getNumWords();
+        assert(numWords == 1);
+    }
+
+    function testGetRequestConfirmationsReturnsThree() public view {
+        uint256 requestConfirmations = lottery.getRequestConfirmations();
+        assert(requestConfirmations == 3);
+    }
+
+    function testGetNumberOfPlayersReturnsZeroInitially() public view {
+        uint256 numPlayers = lottery.getNumberOfPlayers();
+        assert(numPlayers == 0);
+    }
+
+    function testGetNumberOfPlayersReturnsCorrectCount() public {
+        // Arrange
+        uint256 numPlayersToEnter = 5;
+        for (uint256 i = 0; i < numPlayersToEnter; i++) {
+            address player = address(uint160(i + 1));
+            hoax(player, 1 ether);
+            lottery.enterLottery{value: lotteryEntranceFee}();
+        }
+
+        // Act
+        uint256 numPlayers = lottery.getNumberOfPlayers();
+
+        // Assert
+        assert(numPlayers == numPlayersToEnter);
+    }
+
+    function testGetPlayerReturnsCorrectAddress() public {
+        // Arrange
+        address expectedPlayer = address(123);
+        hoax(expectedPlayer, 1 ether);
+        lottery.enterLottery{value: lotteryEntranceFee}();
+
+        // Act
+        address actualPlayer = lottery.getPlayer(0);
+
+        // Assert
+        assert(actualPlayer == expectedPlayer);
+    }
+
+    function testGetRecentWinnerReturnsZeroInitially() public view {
+        address recentWinner = lottery.getRecentWinner();
+        assert(recentWinner == address(0));
+    }
+
+    function testGetLastTimeStampIsSetInConstructor() public view {
+        uint256 lastTimeStamp = lottery.getLastTimeStamp();
+        assert(lastTimeStamp > 0);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           EDGE CASE TESTS
+    //////////////////////////////////////////////////////////////*/
+    function testMultiplePlayersCanEnter() public {
+        // Arrange
+        uint256 numPlayers = 10;
+        
+        // Act
+        for (uint256 i = 0; i < numPlayers; i++) {
+            address player = address(uint160(i + 1));
+            hoax(player, 1 ether);
+            lottery.enterLottery{value: lotteryEntranceFee}();
+        }
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == numPlayers);
+    }
+
+    function testPlayerCanEnterWithExactEntranceFee() public {
+        // Arrange
+        vm.prank(PLAYER);
+        
+        // Act
+        lottery.enterLottery{value: lotteryEntranceFee}();
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == 1);
+        assert(lottery.getPlayer(0) == PLAYER);
+    }
+
+    function testPlayerCanEnterWithMoreThanEntranceFee() public {
+        // Arrange
+        vm.prank(PLAYER);
+        
+        // Act
+        lottery.enterLottery{value: lotteryEntranceFee * 2}();
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == 1);
+        assert(address(lottery).balance == lotteryEntranceFee * 2);
+    }
+
+    function testContractBalanceIncreasesWithEachEntry() public {
+        // Arrange
+        uint256 initialBalance = address(lottery).balance;
+        
+        // Act
+        vm.prank(PLAYER);
+        lottery.enterLottery{value: lotteryEntranceFee}();
+
+        // Assert
+        assert(address(lottery).balance == initialBalance + lotteryEntranceFee);
+    }
+
+    function testPlayerArrayResetsAfterWinnerPicked() public lotteryEntered skipFork {
+        // Arrange
+        uint256 additionalPlayers = 3;
+        for (uint256 i = 1; i <= additionalPlayers; i++) {
+            address player = address(uint160(i));
+            hoax(player, 1 ether);
+            lottery.enterLottery{value: lotteryEntranceFee}();
+        }
+
+        // Act
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(lottery));
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == 0);
+    }
+
+    function testLotteryStateResetsToOpenAfterWinnerPicked() public lotteryEntered skipFork {
+        // Arrange
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        // Act
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(lottery));
+
+        // Assert
+        assert(lottery.getLotteryState() == Lottery.LotteryState.OPEN);
+    }
+
+    function testTimestampUpdatesAfterWinnerPicked() public lotteryEntered skipFork {
+        // Arrange
+        uint256 previousTimestamp = lottery.getLastTimeStamp();
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        // Act
+        vm.warp(block.timestamp + 1);
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(lottery));
+
+        // Assert
+        assert(lottery.getLastTimeStamp() > previousTimestamp);
+    }
+
+    function testWinnerPickedEventIsEmitted() public lotteryEntered skipFork {
+        // Arrange
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        // Act & Assert
+        vm.expectEmit(true, false, false, false, address(lottery));
+        emit WinnerPicked(PLAYER);
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(lottery));
+    }
+
+    function testContractBalanceIsZeroAfterWinnerPaid() public lotteryEntered skipFork {
+        // Arrange
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        // Act
+        VRFCoordinatorV2_5Mock(vrfCoordinatorV2_5).fulfillRandomWords(uint256(requestId), address(lottery));
+
+        // Assert
+        assert(address(lottery).balance == 0);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             FUZZ TESTS
+    //////////////////////////////////////////////////////////////*/
+    function testFuzzEnterLotteryWithDifferentAmounts(uint256 amount) public {
+        // Arrange
+        vm.assume(amount >= lotteryEntranceFee && amount <= 1000 ether);
+        hoax(PLAYER, amount);
+
+        // Act
+        lottery.enterLottery{value: amount}();
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == 1);
+        assert(address(lottery).balance == amount);
+    }
+
+    function testFuzzMultiplePlayersCanEnter(uint8 numPlayers) public {
+        // Arrange
+        vm.assume(numPlayers > 0 && numPlayers <= 100);
+
+        // Act
+        for (uint256 i = 0; i < numPlayers; i++) {
+            address player = address(uint160(i + 1));
+            hoax(player, 1 ether);
+            lottery.enterLottery{value: lotteryEntranceFee}();
+        }
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == numPlayers);
+    }
+
+    function testFuzzTimeIntervalChecking(uint256 timeElapsed) public {
+        // Arrange
+        vm.assume(timeElapsed <= 1000 days);
+        vm.prank(PLAYER);
+        lottery.enterLottery{value: lotteryEntranceFee}();
+        
+        // Act
+        vm.warp(block.timestamp + timeElapsed);
+        (bool upkeepNeeded,) = lottery.checkUpkeep("");
+
+        // Assert
+        if (timeElapsed > automationUpdateInterval) {
+            assert(upkeepNeeded);
+        } else {
+            assert(!upkeepNeeded);
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                      INTEGRATION/SCENARIO TESTS
+    //////////////////////////////////////////////////////////////*/
+    function testSamePlayerCanEnterMultipleTimes() public {
+        // Arrange & Act
+        vm.startPrank(PLAYER);
+        lottery.enterLottery{value: lotteryEntranceFee}();
+        lottery.enterLottery{value: lotteryEntranceFee}();
+        lottery.enterLottery{value: lotteryEntranceFee}();
+        vm.stopPrank();
+
+        // Assert
+        assert(lottery.getNumberOfPlayers() == 3);
+        assert(lottery.getPlayer(0) == PLAYER);
+        assert(lottery.getPlayer(1) == PLAYER);
+        assert(lottery.getPlayer(2) == PLAYER);
+    }
 }
 
