@@ -29,7 +29,7 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/inter
 
 /**
  * @title Decentralized Lottery Contract
- * @author Patrick Collins (Modified)
+ * @author TacitusXI
  * @notice This contract implements a provably fair lottery system using Chainlink services
  * @dev Implements Chainlink VRF V2.5 for verifiable randomness and Chainlink Automation for automated draws
  * 

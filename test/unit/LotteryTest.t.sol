@@ -9,6 +9,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {LinkToken} from "../../test/mocks/LinkToken.sol";
+import {RejectEther} from "../../test/mocks/RejectEther.sol";
 import {CodeConstants} from "../../script/HelperConfig.s.sol";
 
 contract LotteryTest is Test, CodeConstants {
@@ -474,6 +475,36 @@ contract LotteryTest is Test, CodeConstants {
 
         // Assert
         assert(address(lottery).balance == 0);
+    }
+
+    function testTransferFailsWhenWinnerRejectsPayment() public skipFork {
+        // Arrange - Deploy contract that rejects ETH
+        RejectEther rejectEther = new RejectEther();
+        
+        // Enter lottery with RejectEther contract as only player
+        vm.deal(address(rejectEther), 1 ether);
+        vm.prank(address(rejectEther));
+        lottery.enterLottery{value: lotteryEntranceFee}();
+        
+        // Advance time and trigger upkeep
+        vm.warp(block.timestamp + automationUpdateInterval + 1);
+        vm.roll(block.number + 1);
+        
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+        
+        // Act & Assert - Call rawFulfillRandomWords directly as VRF Coordinator
+        // This tests the actual branch where transfer fails
+        vm.prank(vrfCoordinatorV2_5);
+        
+        uint256[] memory randomWords = new uint256[](1);
+        randomWords[0] = 0; // Select index 0 (RejectEther is the only player)
+        
+        // Should revert with Lottery__TransferFailed when trying to send ETH
+        vm.expectRevert(Lottery.Lottery__TransferFailed.selector);
+        lottery.rawFulfillRandomWords(uint256(requestId), randomWords);
     }
 
     /*//////////////////////////////////////////////////////////////

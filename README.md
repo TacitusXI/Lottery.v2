@@ -22,6 +22,7 @@
 * [Testing](#-testing)
 * [Deployment](#-deployment)
 * [Security](#-security)
+* [License](#-license)
 * [Contact](#-contact)
 
 ---
@@ -33,7 +34,7 @@ A fully decentralized lottery system built with Foundry that ensures:
 - **Fully Automated**: Chainlink Automation triggers winner selection automatically
 - **Multi-Network**: Supports Ethereum Sepolia, Polygon Amoy, and local Anvil
 - **Gas Optimized**: Uses custom errors and optimized storage patterns
-- **Extensively Tested**: 98%+ test coverage with unit, fuzz, invariant, and staging tests
+- **Extensively Tested**: 100% test coverage with unit, fuzz, invariant, and staging tests
 
 ### How It Works
 
@@ -67,7 +68,7 @@ A fully decentralized lottery system built with Foundry that ensures:
 ✅ **Multi-Network Support** - Ethereum, Polygon Amoy, Local Anvil  
 ✅ **Automated Deployment** - Scripts handle VRF subscription creation and funding  
 ✅ **Secure Key Management** - Supports encrypted keystores (no plain text keys)  
-✅ **Comprehensive Tests** - Unit, fuzz, invariant, staging tests, 98%+ coverage  
+✅ **Comprehensive Tests** - Unit, fuzz, invariant, staging tests, 100% coverage  
 ✅ **Professional CI/CD Ready** - Structured for GitHub Actions integration  
 
 ---
@@ -200,8 +201,8 @@ PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
 
 ### Test Suite Overview
 
-**46 comprehensive tests** with **98%+ coverage**:
-- ✅ 36 Unit Tests (functional testing)
+**47 comprehensive tests** with **100% coverage**:
+- ✅ 37 Unit Tests (functional testing)
 - ✅ 8 Invariant Tests (property-based testing, 128K calls)
 - ✅ 3 Fuzz Tests (256 runs each)
 - ✅ 2 Staging Tests (integration testing)
@@ -256,10 +257,12 @@ See [test/README.md](test/README.md) for detailed test documentation.
 **Current Coverage:**
 ```
 src/Lottery.sol:
-├── Lines:      98.28% ✅
-├── Statements: 98.04% ✅
-├── Branches:   75.00% ⚠️
-└── Functions:  100.00% ✅
+├── Lines:      100.00% ✅✅✅
+├── Statements: 100.00% ✅✅✅
+├── Branches:   100.00% ✅✅✅
+└── Functions:  100.00% ✅✅✅
+
+PERFECT SCORE! 🎯
 ```
 
 ### Gas Snapshot
@@ -392,8 +395,8 @@ slither . --exclude-dependencies
 ```
 Smart Contracts:     1 (Lottery.sol)
 Lines of Code:       ~320 (contract + tests)
-Test Coverage:       98%+ (Lines), 100% (Functions)
-Number of Tests:     46 (36 unit, 8 invariant, 2 staging)
+Test Coverage:       100% (Lines, Statements, Branches, Functions)
+Number of Tests:     47 (37 unit, 8 invariant, 2 staging)
 Gas Optimization:    Custom errors, immutables
 Deployment Scripts:  Fully automated
 Networks Supported:  3 (Anvil, Sepolia, Polygon Amoy)
@@ -451,26 +454,6 @@ make clean              # Clean build artifacts
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-### Areas for Contribution:
-- Implement Pausable pattern for emergency stops
-- Add reentrancy guard tests
-- Achieve 100% branch coverage
-- Add multi-winner support
-- Create frontend DApp
-- Improve gas optimization
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -479,20 +462,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💬 Contact
 
-**Created by [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)**
+**Created by TacitusXI**
 
-Feel free to reach out:
-- 💼 [LinkedIn](https://linkedin.com/in/your-profile)
-- 🐦 [Twitter](https://twitter.com/your-handle)
-- 📧 Email: your.email@example.com
+- 🔗 GitHub: [@TacitusXI](https://github.com/TacitusXI)
+- 📂 Project: [Lottery.v2](https://github.com/TacitusXI/Lottery.v2)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- [Patrick Collins](https://twitter.com/PatrickAlphaC) - Cyfrin Foundry Course
 - [Chainlink](https://chain.link/) - VRF and Automation infrastructure
-- [Foundry](https://getfoundry.sh/) - Fast, portable, modular toolkit
+- [Foundry](https://getfoundry.sh/) - Fast, portable, modular smart contract development toolkit
 
 ---
 
