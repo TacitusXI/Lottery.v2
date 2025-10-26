@@ -475,19 +475,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Chainlink](https://chain.link/) - VRF and Automation infrastructure
 - [Foundry](https://getfoundry.sh/) - Fast, portable, modular smart contract development toolkit
-
----
-
-## ⭐ Show Your Support
-
-If this project helped you, please consider:
-- ⭐ Starring the repository
-- 🔄 Sharing with others
-- 🐛 Reporting bugs
-- 💡 Suggesting features
-
----
-
-**Built with ❤️ using Foundry & Chainlink**
-
-![Lottery Banner](./img/automation.png)
